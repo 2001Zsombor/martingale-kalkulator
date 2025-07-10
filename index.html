@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <title>Martingale tétkalkulátor tőke alapján</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #111; color: #eee; padding: 20px; }
+    label, input, button { display: block; margin: 10px 0; font-size: 16px; }
+    input { padding: 6px; width: 120px; font-size: 16px; }
+    button { padding: 10px 20px; font-size: 16px; background-color: #00cc66; color: #000; border: none; cursor: pointer; }
+    table { margin-top: 20px; border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #555; padding: 10px; text-align: center; }
+    th { background-color: #333; }
+  </style>
+</head>
+<body>
+  <h2>Martingale kalkulátor – tőkealapú tétfelosztás</h2>
+
+  <label for="capital">Teljes tőkéd ($):</label>
+  <input type="number" id="capital" value="100" step="0.01">
+
+  <label for="payout">Payout (%):</label>
+  <input type="number" id="payout" value="80" step="1">
+
+  <button onclick="calculate()">Számolj</button>
+
+  <table id="results" style="display:none;">
+    <thead>
+      <tr>
+        <th>Lépés</th>
+        <th>Tét ($)</th>
+        <th>Összes addigi veszteség ($)</th>
+        <th>Profit, ha itt nyersz ($)</th>
+        <th>Maradék tőkéd ($)</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+
+  <script>
+    function calculate() {
+      const capital = parseFloat(document.getElementById("capital").value);
+      const payoutPercent = parseFloat(document.getElementById("payout").value);
+
+      if (isNaN(capital) || isNaN(payoutPercent) || payoutPercent <= 0) {
+        alert("Kérlek adj meg érvényes értékeket.");
+        return;
+      }
+
+      const payout = payoutPercent / 100;
+      const profitTarget = capital * 0.01; // minimális cél: 1% profit
+      let bet = profitTarget / payout; // első tét
+      let totalLoss = 0;
+      let remainingCapital = capital;
+
+      const tbody = document.getElementById("resultBody");
+      tbody.innerHTML = "";
+      let step = 1;
+
+      while (true) {
+        const potentialProfit = bet * payout;
+        const profitIfWin = potentialProfit - totalLoss;
+
+        if (bet > remainingCapital) break;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${step}</td>
+          <td>${bet.toFixed(2)}</td>
+          <td>${totalLoss.toFixed(2)}</td>
+          <td>${profitIfWin.toFixed(2)}</td>
+          <td>${(remainingCapital - bet).toFixed(2)}</td>
+        `;
+        tbody.appendChild(row);
+
+        remainingCapital -= bet;
+        totalLoss += bet;
+        step += 1;
+
+        // következő tét
+        bet = (totalLoss + profitTarget) / payout;
+      }
+
+      document.getElementById("results").style.display = "table";
+    }
+  </script>
+</body>
+</html>
