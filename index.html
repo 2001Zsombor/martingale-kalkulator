@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-  <meta charset="UTF-8">
-  <title>Martingale tétkalkulátor tőke alapján</title>
+  <meta charset="UTF-8" />
+  <title>Martingale kalkulátor</title>
   <style>
     body { font-family: Arial, sans-serif; background-color: #111; color: #eee; padding: 20px; }
     label, input, button { display: block; margin: 10px 0; font-size: 16px; }
@@ -17,10 +17,10 @@
   <h2>Martingale kalkulátor – tőkealapú tétfelosztás</h2>
 
   <label for="capital">Teljes tőkéd ($):</label>
-  <input type="number" id="capital" value="100" step="0.01">
+  <input type="number" id="capital" value="100" step="0.01" min="1" />
 
   <label for="payout">Payout (%):</label>
-  <input type="number" id="payout" value="80" step="1">
+  <input type="number" id="payout" value="80" step="1" min="1" />
 
   <button onclick="calculate()">Számolj</button>
 
@@ -48,8 +48,9 @@
       }
 
       const payout = payoutPercent / 100;
-      const profitTarget = capital * 0.01; // minimális cél: 1% profit
-      let bet = profitTarget / payout; // első tét
+      const profitTarget = capital * 0.01; // 1% profit cél
+
+      let bet = Math.max(profitTarget / payout, 1); // minimum 1$
       let totalLoss = 0;
       let remainingCapital = capital;
 
@@ -77,8 +78,7 @@
         totalLoss += bet;
         step += 1;
 
-        // következő tét
-        bet = (totalLoss + profitTarget) / payout;
+        bet = Math.max((totalLoss + profitTarget) / payout, 1);
       }
 
       document.getElementById("results").style.display = "table";
